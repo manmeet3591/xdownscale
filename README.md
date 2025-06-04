@@ -45,11 +45,25 @@ from xdownscale import Downscaler
 viirs = xr.open_dataset("viirs.nc")["avg_rad"]
 dmsp = xr.open_dataset("dmsp.nc")["constant"]
 
-# Initialize and train the downscaling model
-ds = Downscaler(viirs, dmsp)
+import xarray as xr
+import numpy as np
+from xdownscale import Downscaler
 
-# Predict high-resolution output from a new VIIRS image
-predicted = ds.predict(viirs)
+# Create dummy data for test
+x = np.random.rand(128, 128).astype(np.float32)
+y = (x + np.random.normal(0, 0.01, size=x.shape)).astype(np.float32)
+
+input_da = xr.DataArray(x, dims=["lat", "lon"])
+target_da = xr.DataArray(y, dims=["lat", "lon"])
+
+# Use FSRCNN instead of default SRCNN
+ds = Downscaler(input_da, target_da, model_name="fsrcnn")
+
+
+# Predict on new input
+result = ds.predict(input_da)
+result.plot()
+
 ```
 
 ## 📘 Description
