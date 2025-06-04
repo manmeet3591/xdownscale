@@ -4,15 +4,18 @@ from .model import *  # SRCNN, FSRCNN
 from .utils import patchify, unpatchify
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
+import wandb
 
 class Downscaler:
     def __init__(self, input_da, target_da, model_name="srcnn",
                  patch_size=32, batch_size=20, epochs=100,
-                 val_split=0.1, test_split=0.1, device='cuda'):
+                 val_split=0.1, test_split=0.1, device='cuda',
+                 use_wandb=False):
         self.patch_size = patch_size
         self.batch_size = batch_size
         self.epochs = epochs
         self.device = device
+        self.use_wandb = use_wandb
 
         self.x_max = input_da.values.max()
         self.y_max = target_da.values.max()
@@ -20,7 +23,7 @@ class Downscaler:
         self.target_da = target_da / self.y_max
 
         self.model = self._get_model(model_name).to(device)
-        self._train(val_split, test_split)
+        self._train(val_split, test_split, model_name)
 
     def _get_model(self, name):
         name = name.lower()
@@ -31,7 +34,15 @@ class Downscaler:
         else:
             raise ValueError(f"Unknown model name: {name}")
 
-    def _train(self, val_split, test_split):
+    def _train(self, val_split, test_split, model_name):
+        if self.use_wandb:
+            wandb.init(project="xdownscale", config={
+                "model": model_name,
+                "epochs": self.epochs,
+                "batch_size": self.batch_size,
+                "patch_size": self.patch_size
+            })
+
         x = self.input_da.values.astype(np.float32)
         y = self.target_da.values.astype(np.float32)
 
@@ -78,10 +89,15 @@ class Downscaler:
                     val_loss += criterion(preds, yb).item()
             val_loss /= len(val_loader)
 
+            if self.use_wandb:
+                wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+
             if epoch % 10 == 0 or epoch == self.epochs - 1:
                 print(f"[{epoch}] Train: {train_loss:.4f} | Val: {val_loss:.4f}")
 
         self.test_loader = test_loader
+        if self.use_wandb:
+            wandb.finish()
 
     def predict(self, input_da: xr.DataArray, use_patches: bool = True) -> xr.DataArray:
         x_input = (input_da.values / self.x_max).astype(np.float32)
