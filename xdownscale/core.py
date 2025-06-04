@@ -5,13 +5,14 @@ from .utils import patchify, unpatchify
 import xarray as xr
 
 class Downscaler:
-    def __init__(self, input_da, target_da, patch_size=32, device='cuda', model_name="srcnn"):
+    def __init__(self, input_da, target_da, patch_size=32, device='cuda', model_name="srcnn", epochs=100,):
         self.patch_size = patch_size
         self.device = device
         self.x_max = input_da.values.max()
         self.y_max = target_da.values.max()
         self.input_da = input_da / self.x_max
         self.target_da = target_da / self.y_max
+        self.epochs = epochs
 
         self.model = self._get_model(model_name).to(device)
         self._train()
@@ -42,7 +43,7 @@ class Downscaler:
         criterion = torch.nn.MSELoss()
 
         self.model.train()
-        for epoch in range(100):
+        for epoch in range(self.epochs):
             total_loss = 0.0
             for xb, yb in loader:
                 optimizer.zero_grad()
