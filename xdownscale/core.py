@@ -81,18 +81,23 @@ class Downscaler:
             if epoch % 10 == 0 or epoch == self.epochs - 1:
                 print(f"[{epoch}] Train: {train_loss:.4f} | Val: {val_loss:.4f}")
 
-        self.test_loader = test_loader  # Store test loader for later use
+        self.test_loader = test_loader
 
-    def predict(self, input_da: xr.DataArray) -> xr.DataArray:
+    def predict(self, input_da: xr.DataArray, use_patches: bool = True) -> xr.DataArray:
         x_input = (input_da.values / self.x_max).astype(np.float32)
-        patches = patchify(x_input, self.patch_size)
-        x_tensor = torch.from_numpy(patches[:, None, :, :]).to(self.device)
 
         self.model.eval()
         with torch.no_grad():
-            preds = self.model(x_tensor).cpu().numpy()[:, 0, :, :] * self.y_max
-
-        preds[preds < 0] = 0.0
-        reconstructed = unpatchify(preds, x_input.shape)
+            if use_patches:
+                patches = patchify(x_input, self.patch_size)
+                x_tensor = torch.from_numpy(patches[:, None, :, :]).to(self.device)
+                preds = self.model(x_tensor).cpu().numpy()[:, 0, :, :] * self.y_max
+                preds[preds < 0] = 0.0
+                reconstructed = unpatchify(preds, x_input.shape)
+            else:
+                x_tensor = torch.from_numpy(x_input[None, None, :, :]).to(self.device)
+                pred = self.model(x_tensor).cpu().numpy()[0, 0, :, :] * self.y_max
+                pred[pred < 0] = 0.0
+                reconstructed = pred
 
         return xr.DataArray(reconstructed, coords=input_da.coords, dims=input_da.dims)
