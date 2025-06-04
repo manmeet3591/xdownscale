@@ -1,9 +1,6 @@
 # xdownscale
 
-There was a temporary issue saving the `README.md` file. Let me try again to generate and save it for you.
 
-
-The environment is having trouble saving the `README.md` file directly. Here’s the full content of the `README.md` you can copy and include in your package manually:
 
 ---
 
