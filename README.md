@@ -7,7 +7,7 @@
 ````markdown
 
 
-**xdownscale** is a Python package for super-resolution downscaling of satellite data using a simple SRCNN (Super-Resolution Convolutional Neural Network) model. It allows mapping from a lower-resolution input image (e.g., VIIRS) to a higher-resolution target (e.g., DMSP) in just two lines of code using PyTorch and xarray.
+xdownscale is a Python package for super-resolution downscaling of satellite data using different AI models. It allows mapping from a lower-resolution input image (e.g., VIIRS) to a higher-resolution target (e.g., DMSP) in just two lines of code using PyTorch and xarray.
 
 🚀 Installation
 
