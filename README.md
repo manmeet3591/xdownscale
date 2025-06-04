@@ -69,10 +69,3 @@ To extend this package:
 ## 📄 License
 
 MIT License.
-
-```
-
----
-
-Would you like me to update your zip package to include this `README.md` as well?
-```
