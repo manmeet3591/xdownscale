@@ -1,22 +1,29 @@
 import torch
 import numpy as np
-from .model import SRCNN
+from .model import * # SRCNN, FSRCNN
 from .utils import patchify, unpatchify
 import xarray as xr
 
 class Downscaler:
-    def __init__(self, input_da: xr.DataArray, target_da: xr.DataArray, patch_size=32, device='cuda'):
+    def __init__(self, input_da, target_da, patch_size=32, device='cuda', model_name="srcnn"):
         self.patch_size = patch_size
         self.device = device
-
-        # Normalize
         self.x_max = input_da.values.max()
         self.y_max = target_da.values.max()
         self.input_da = input_da / self.x_max
         self.target_da = target_da / self.y_max
 
-        self.model = SRCNN().to(device)
+        self.model = self._get_model(model_name).to(device)
         self._train()
+    
+    def _get_model(self, name):
+        name = name.lower()
+        if name == "srcnn":
+            return SRCNN()
+        elif name == "fsrcnn":
+            return FSRCNN()
+        else:
+            raise ValueError(f"Unknown model name: {name}")
 
     def _train(self):
         x_train = self.input_da.values.astype(np.float32)
