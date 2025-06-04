@@ -5,7 +5,7 @@ from .utils import patchify, unpatchify
 import xarray as xr
 
 class Downscaler:
-    def __init__(self, input_da, target_da, patch_size=32, device='cuda', model_name="srcnn", epochs=100,):
+    def __init__(self, input_da, target_da, patch_size=32, device='cuda', model_name="srcnn", epochs=100):
         self.patch_size = patch_size
         self.device = device
         self.x_max = input_da.values.max()
