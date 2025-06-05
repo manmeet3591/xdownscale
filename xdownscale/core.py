@@ -42,6 +42,8 @@ class Downscaler:
             return FALSRB(in_channels=1, out_channels=1, scale_factor=1)
         elif name == "srresnet":
             return SRResNet(in_channels=1, out_channels=1, upscale_factor=1)
+        elif name == "carn":
+            return CARN(in_channels=1, out_channels=1, upscale_factor=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
