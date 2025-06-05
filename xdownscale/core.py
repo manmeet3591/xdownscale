@@ -44,6 +44,16 @@ class Downscaler:
                 "batch_size": self.batch_size,
                 "patch_size": self.patch_size
             })
+            wandb.init(
+                project="xdownscale",
+                name=f"{model_name.upper()}_run",
+                config={
+                    "model": model_name,
+                    "epochs": self.epochs,
+                    "batch_size": self.batch_size,
+                    "patch_size": self.patch_size
+                }
+            )
 
         x = self.input_da.values.astype(np.float32)
         y = self.target_da.values.astype(np.float32)
