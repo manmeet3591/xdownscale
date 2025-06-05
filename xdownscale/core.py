@@ -5,6 +5,9 @@ from .utils import patchify, unpatchify
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import wandb
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class Downscaler:
     def __init__(self, input_da, target_da, model_name="srcnn",
