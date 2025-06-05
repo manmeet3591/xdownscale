@@ -120,3 +120,35 @@ class LapSRN(nn.Module):
             x = self.pixel_shuffle(x)
 
         return x
+
+class FALSRB(nn.Module):
+    def __init__(self, in_channels=1, out_channels=1, num_features=32, scale_factor=1):
+        super(FALSRB, self).__init__()
+
+        self.conv1 = nn.Conv2d(in_channels, num_features, kernel_size=3, padding=1)
+        self.relu1 = nn.ReLU(inplace=True)
+
+        self.residual = self.make_layer(num_features, num_features, 3)
+
+        self.conv2 = nn.Conv2d(num_features, num_features, kernel_size=3, padding=1)
+        self.relu2 = nn.ReLU(inplace=True)
+
+        if scale_factor > 1:
+            self.upsample = nn.ConvTranspose2d(num_features, out_channels, kernel_size=3, stride=scale_factor, padding=1, output_padding=1)
+        else:
+            self.upsample = nn.Conv2d(num_features, out_channels, kernel_size=3, padding=1)
+
+    def make_layer(self, in_channels, out_channels, kernel_size):
+        padding = kernel_size // 2
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=padding),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, kernel_size=kernel_size, padding=padding),
+        )
+
+    def forward(self, x):
+        x1 = self.relu1(self.conv1(x))
+        x2 = self.residual(x1)
+        x3 = self.relu2(self.conv2(x1 + x2))
+        out = self.upsample(x3)
+        return out
