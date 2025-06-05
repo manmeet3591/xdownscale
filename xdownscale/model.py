@@ -337,3 +337,66 @@ class MDSR(nn.Module):
 
         x3 = self.output_conv(x2)
         return x + x3
+
+class ResidualBlock(nn.Module):
+    def __init__(self, in_channels):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(in_channels)
+        self.prelu = nn.PReLU()
+        self.conv2 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(in_channels)
+
+    def forward(self, x):
+        residual = x
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.prelu(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        return x + residual
+
+class SecondOrderChannelAttention(nn.Module):
+    def __init__(self, in_channels):
+        super(SecondOrderChannelAttention, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(in_channels, in_channels // 16),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_channels // 16, in_channels)
+        )
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
+        return x * torch.sigmoid(y)
+
+class SAN(nn.Module):
+    def __init__(self, in_channels, upscale_factor, num_blocks, num_heads):
+        super(SAN, self).__init__()
+
+        self.input_conv = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.prelu = nn.PReLU()
+
+        self.residual_blocks = nn.Sequential(
+            *[ResidualBlock(64) for _ in range(num_blocks)]
+        )
+
+        self.attention_blocks = nn.Sequential(
+            *[SecondOrderChannelAttention(64) for _ in range(num_heads)]
+        )
+
+        self.output_conv = nn.Conv2d(64, in_channels, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        x1 = self.input_conv(x)
+        x1 = self.prelu(x1)
+
+        x2 = self.residual_blocks(x1)
+
+        x3 = self.attention_blocks(x2)
+
+        x4 = self.output_conv(x3)
+        return x + x4
+
