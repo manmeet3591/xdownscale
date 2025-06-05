@@ -31,6 +31,8 @@ class Downscaler:
             return SRCNN()
         elif name == "fsrcnn":
             return FSRCNN()
+        elif name == "carnm":
+            return CARNM(num_channels=1, scale_factor=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
