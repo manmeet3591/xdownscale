@@ -46,6 +46,8 @@ class Downscaler:
             return CARN(in_channels=1, out_channels=1, upscale_factor=1)
         elif name == "falsra":
             return FALSR_A()
+        elif name == "oisrrk2":
+            return OISRRK2()
         else:
             raise ValueError(f"Unknown model name: {name}")
 
