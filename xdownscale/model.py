@@ -278,3 +278,22 @@ class FALSR_A(nn.Module):
         x5 = self.relu(self.conv5(x4))
         x6 = self.pixel_shuffle(self.conv6(x5))
         return x6
+
+class OISRRK2(nn.Module):
+    def __init__(self, in_channels=1, upscale_factor=1):
+        super(OISRRK2, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.conv5 = nn.Conv2d(64, in_channels * (upscale_factor ** 2), kernel_size=3, stride=1, padding=1)
+        self.upscale_factor = upscale_factor
+
+    def forward(self, x):
+        res1 = F.relu(self.conv1(x))
+        res2 = F.relu(self.conv2(res1))
+        res3 = F.relu(self.conv3(res2))
+        res4 = F.relu(self.conv4(res3))
+        res5 = self.conv5(res4)
+        out = F.pixel_shuffle(res5, self.upscale_factor) + x
+        return out
