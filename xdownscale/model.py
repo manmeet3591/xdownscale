@@ -254,3 +254,27 @@ class CARN(nn.Module):
 
         out = self.exit(x4)
         return out
+
+class FALSR_A(nn.Module):
+    def __init__(self, in_channels=1, upscale_factor=1):
+        super(FALSR_A, self).__init__()
+
+        self.relu = nn.ReLU(inplace=True)
+
+        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv5 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv6 = nn.Conv2d(32, in_channels * (upscale_factor ** 2), kernel_size=3, stride=1, padding=1)
+
+        self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
+
+    def forward(self, x):
+        x1 = self.relu(self.conv1(x))
+        x2 = self.relu(self.conv2(x1))
+        x3 = self.relu(self.conv3(x2))
+        x4 = self.relu(self.conv4(x3))
+        x5 = self.relu(self.conv5(x4))
+        x6 = self.pixel_shuffle(self.conv6(x5))
+        return x6
