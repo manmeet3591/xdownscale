@@ -35,6 +35,8 @@ class Downscaler:
             return LapSRN(in_channels=1, upscale_factor=1)
         elif name == "carnm":
             return CARNM(num_channels=1, scale_factor=1)
+        elif name == "falsrb":
+            return FALSRB(in_channels=1, out_channels=1, scale_factor=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
