@@ -92,3 +92,31 @@ class CARNM(nn.Module):
         if self.upsample is not None:
             x = self.upsample(x)
         return self.exit(x)
+
+class LapSRN(nn.Module):
+    def __init__(self, in_channels=1, upscale_factor=1):
+        super(LapSRN, self).__init__()
+
+        self.upscale_factor = upscale_factor
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
+        self.relu1 = nn.LeakyReLU(0.2)
+
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.LeakyReLU(0.2)
+
+        self.conv3 = nn.Conv2d(64, in_channels * (upscale_factor ** 2), kernel_size=3, stride=1, padding=1)
+
+        if upscale_factor > 1:
+            self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
+        else:
+            self.pixel_shuffle = None
+
+    def forward(self, x):
+        x = self.relu1(self.conv1(x))
+        x = self.relu2(self.conv2(x))
+        x = self.conv3(x)
+
+        if self.pixel_shuffle is not None:
+            x = self.pixel_shuffle(x)
+
+        return x
