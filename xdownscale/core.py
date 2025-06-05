@@ -48,6 +48,8 @@ class Downscaler:
             return FALSR_A()
         elif name == "oisrrk2":
             return OISRRK2()
+        elif name == "mdsr":
+            return MDSR(in_channels=1, upscale_factor=1, num_blocks=16)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
