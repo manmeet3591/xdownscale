@@ -200,3 +200,57 @@ class SRResNet(nn.Module):
 
         out = self.conv3(x3)
         return out
+
+class ResidualBlock(nn.Module):
+    def __init__(self, num_features):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = nn.Conv2d(num_features, num_features, kernel_size=3, padding=1)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(num_features, num_features, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        residual = self.conv1(x)
+        residual = self.relu(residual)
+        residual = self.conv2(residual)
+        return x + residual
+
+class CARN(nn.Module):
+    def __init__(self, in_channels=1, out_channels=1, num_features=64, upscale_factor=1):
+        super(CARN, self).__init__()
+        self.entry = nn.Conv2d(in_channels, num_features, kernel_size=3, padding=1)
+
+        self.b1 = ResidualBlock(num_features)
+        self.b2 = ResidualBlock(num_features)
+        self.b3 = ResidualBlock(num_features)
+
+        self.c1 = nn.Conv2d(num_features * 2, num_features, kernel_size=1)
+        self.c2 = nn.Conv2d(num_features * 3, num_features, kernel_size=1)
+        self.c3 = nn.Conv2d(num_features * 4, num_features, kernel_size=1)
+
+        if upscale_factor > 1:
+            self.upsample = nn.Sequential(
+                nn.Conv2d(num_features, num_features * (upscale_factor ** 2), kernel_size=3, padding=1),
+                nn.PixelShuffle(upscale_factor)
+            )
+        else:
+            self.upsample = None
+
+        self.exit = nn.Conv2d(num_features, out_channels, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        x1 = self.entry(x)
+
+        x2 = self.b1(x1)
+        x2 = self.c1(torch.cat([x1, x2], dim=1))
+
+        x3 = self.b2(x2)
+        x3 = self.c2(torch.cat([x1, x2, x3], dim=1))
+
+        x4 = self.b3(x3)
+        x4 = self.c3(torch.cat([x1, x2, x3, x4], dim=1))
+
+        if self.upsample is not None:
+            x4 = self.upsample(x4)
+
+        out = self.exit(x4)
+        return out
