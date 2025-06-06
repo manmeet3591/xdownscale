@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from .model import *  # SRCNN, FSRCNN
 from .distgssr import Net as distgssr
+from .swinir import SwinIR
 from .utils import patchify, unpatchify
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
@@ -67,7 +68,10 @@ class Downscaler:
             return Net(angRes=5, factor=1)
         elif name == "distgssr":
             return distgssr(angRes=5, factor=1)
-
+        elif name == "swin":
+            return SwinIR(upscale=1, img_size=(self.patch_size, self.patch_size),
+               window_size=window_size, img_range=1., depths=[6, 6, 6, 6],
+               embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2, upsampler='pixelshuffledirect')
         else:
             raise ValueError(f"Unknown model name: {name}")
 
