@@ -70,7 +70,7 @@ class Downscaler:
             return distgssr(angRes=5, factor=1)
         elif name == "swin":
             return SwinIR(upscale=1, img_size=(self.patch_size, self.patch_size),
-               window_size=window_size, img_range=1., depths=[6, 6, 6, 6],
+               window_size=5, img_range=1., depths=[6, 6, 6, 6],
                embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2, upsampler='pixelshuffledirect')
         else:
             raise ValueError(f"Unknown model name: {name}")
