@@ -514,3 +514,54 @@ class UNet(nn.Module):
 
         return self.final_conv(x)
 
+class CALayer(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(CALayer, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.c1 = nn.Conv2d(channel, channel // reduction, 1, padding=0)
+        self.c2 = nn.Conv2d(channel // reduction, channel, 1, padding=0)
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.c1(y)
+        y = nn.ReLU()(y)
+        y = self.c2(y)
+        return nn.Sigmoid()(y) * x
+
+class Block(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+        super(Block, self).__init__()
+        self.c1 = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        self.c2 = nn.Conv2d(out_channels, out_channels, kernel_size, stride, padding)
+        self.relu = nn.ReLU(inplace=True)
+        self.ca = CALayer(out_channels)
+
+    def forward(self, x):
+        h0 = self.relu(self.c1(x))
+        h1 = self.c2(h0)
+        h1 = self.ca(h1)
+        return h1
+
+class DLGSANet(nn.Module):
+    def __init__(self, in_channels, upscale_factor):
+        super(DLGSANet, self).__init__()
+
+        self.input_conv = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.relu = nn.ReLU(inplace=True)
+
+        self.blocks = nn.Sequential(
+            Block(64, 64),
+            Block(64, 64),
+            Block(64, 64),
+            Block(64, 64)
+        )
+
+        self.output_conv = nn.Conv2d(64, in_channels, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        x1 = self.relu(self.input_conv(x))
+
+        x2 = self.blocks(x1)
+
+        x3 = self.output_conv(x2)
+        return x + x3
