@@ -565,3 +565,54 @@ class DLGSANet(nn.Module):
 
         x3 = self.output_conv(x2)
         return x + x3
+
+class DPMN(nn.Module):
+    def __init__(self, in_channels=1, upscale_factor=1):
+        super(DPMN, self).__init__()
+
+        self.relu = nn.ReLU(inplace=True)
+
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(64)
+
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
+
+        self.conv4 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(64)
+
+        self.conv5 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn4 = nn.BatchNorm2d(64)
+
+        self.conv6 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn5 = nn.BatchNorm2d(64)
+
+        self.conv7 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn6 = nn.BatchNorm2d(64)
+
+        self.conv8 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn7 = nn.BatchNorm2d(64)
+
+        self.conv9 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn8 = nn.BatchNorm2d(64)
+
+        self.conv10 = nn.Conv2d(64, in_channels, kernel_size=3, stride=1, padding=1)
+
+    def forward(self, x):
+        residual = x
+
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.bn1(self.conv2(x)))
+        x = self.relu(self.bn2(self.conv3(x)))
+        x = self.relu(self.bn3(self.conv4(x)))
+        x = self.relu(self.bn4(self.conv5(x)))
+        x = self.relu(self.bn5(self.conv6(x)))
+        x = self.relu(self.bn6(self.conv7(x)))
+        x = self.relu(self.bn7(self.conv8(x)))
+        x = self.relu(self.bn8(self.conv9(x)))
+
+        x = self.conv10(x)
+        x = torch.add(x, residual)
+
+        return x
