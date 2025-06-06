@@ -54,6 +54,8 @@ class Downscaler:
             return SAN(in_channels=1, upscale_factor=1, num_blocks=16, num_heads=8)
         elif name == "rcan":
             return RCAN(in_channels=1, num_blocks=1, upscale_factor=16)
+        elif name == "unet":
+            return UNet(in_channels=1, out_channels=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
