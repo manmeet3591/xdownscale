@@ -57,7 +57,7 @@ class Downscaler:
         elif name == "unet":
             return UNet(in_channels=1, out_channels=1)
         elif name == "dlgsanet":
-        return DLGSANet(in_channels=1, upscale_factor=1)
+            return DLGSANet(in_channels=1, upscale_factor=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
