@@ -2,3 +2,4 @@ torch
 xarray
 numpy
 wandb
+timm
