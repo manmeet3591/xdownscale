@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from .model import *  # SRCNN, FSRCNN
+from .distgssr import Net as distgssr
 from .utils import patchify, unpatchify
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
@@ -64,6 +65,9 @@ class Downscaler:
             return SAFMN(in_channels=1, upscale_factor=1)
         elif name == "dpt":
             return Net(angRes=5, factor=1)
+        elif name == "distgssr":
+            return distgssr(angRes=5, factor=1)
+
         else:
             raise ValueError(f"Unknown model name: {name}")
 
