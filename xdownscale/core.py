@@ -52,6 +52,8 @@ class Downscaler:
             return MDSR(in_channels=1, upscale_factor=1, num_blocks=16)
         elif name == "san":
             return SAN(in_channels=1, upscale_factor=1, num_blocks=16, num_heads=8)
+        elif name == "rcan":
+            return RCAN(in_channels=1, num_blocks=1, upscale_factor=16)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
