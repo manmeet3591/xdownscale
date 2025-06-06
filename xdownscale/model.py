@@ -400,3 +400,51 @@ class SAN(nn.Module):
         x4 = self.output_conv(x3)
         return x + x4
 
+
+class ResidualChannelAttentionBlock(nn.Module):
+    def __init__(self, n_feat, kernel_size=3, reduction=16, bias=True, bn=False, act=nn.ReLU(True), res_scale=1):
+        super(ResidualChannelAttentionBlock, self).__init__()
+        modules_body = []
+        for _ in range(2):
+            modules_body.append(nn.Conv2d(n_feat, n_feat, kernel_size, padding=1, bias=bias))
+            if bn: modules_body.append(nn.BatchNorm2d(n_feat))
+            modules_body.append(act)
+        modules_body.pop() # remove last activation
+        self.body = nn.Sequential(*modules_body)
+        # channel attention
+        self.ca = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(n_feat, n_feat // reduction, 1, padding=0, bias=bias),
+            act,
+            nn.Conv2d(n_feat // reduction, n_feat, 1, padding=0, bias=bias),
+            nn.Sigmoid()
+        )
+        self.res_scale = res_scale
+
+    def forward(self, x):
+        res = self.body(x)
+        res = self.ca(res) * res
+        res += x
+        return res
+
+class RCAN(nn.Module):
+    def __init__(self, in_channels, num_blocks, upscale_factor):
+        super(RCAN, self).__init__()
+
+        self.input_conv = nn.Conv2d(in_channels, 64, kernel_size=3, padding=1)
+        self.prelu = nn.PReLU()
+
+        self.residual_blocks = nn.Sequential(
+            *[ResidualChannelAttentionBlock(64) for _ in range(num_blocks)]
+        )
+
+        self.output_conv = nn.Conv2d(64, in_channels, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        x1 = self.input_conv(x)
+        x1 = self.prelu(x1)
+
+        x2 = self.residual_blocks(x1)
+
+        x3 = self.output_conv(x2)
+        return x + x3
