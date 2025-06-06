@@ -62,6 +62,8 @@ class Downscaler:
             return DPMN(in_channels=1, upscale_factor=1)
         elif name == "safmn":
             return SAFMN(in_channels=1, upscale_factor=1)
+        elif name == "dpt":
+            return Net(angRes=5, factor=1)
         else:
             raise ValueError(f"Unknown model name: {name}")
 
