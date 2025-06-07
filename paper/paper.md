@@ -1,5 +1,5 @@
 ---
-title: 'xdownscale: A Deep Learning Toolkit for Spatial Resolution Enhancement of Earth Observation Data'
+title: 'xdownscale: A Deep Learning Toolkit for Spatiotemporal Resolution Enhancement of Gridded Data'
 tags:
   - Python
   - deep learning
