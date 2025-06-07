@@ -9,10 +9,10 @@ tags:
   - remote sensing
 authors:
   - name: Manmeet Singh
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-3374-7149
     affiliation: 1
 affiliations:
-  - name: Independent Researcher
+  - name: The University of Texas at Austin
     index: 1
 date: 2025-06-06
 bibliography: paper.bib
