@@ -14,6 +14,12 @@ authors:
   - name: Naveen Sudharsan
     orcid: 0000-0002-1328-110X
     affiliation: 1
+  - name: Hassan Dashtian
+    orcid: 0000-0001-6400-1190
+    affiliation: 1
+  - name: Harsh Kamath
+    orcid: 0000-0002-5210-8369
+    affiliation: 1
   - name: Amit Kumar Srivastava
     orcid: 0000-0001-8219-4854
     affiliation: 3
