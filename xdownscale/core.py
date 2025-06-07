@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 import wandb
 import torch.nn as nn
 import torch.nn.functional as F
+import copy
 
 class Downscaler:
     def __init__(self, input_da, target_da, model_name="srcnn",
@@ -116,6 +117,7 @@ class Downscaler:
         criterion = torch.nn.MSELoss()
 
         best_val_loss = float("inf")
+        best_model_state = None
         wait = 0
 
         for epoch in range(self.epochs):
@@ -146,15 +148,20 @@ class Downscaler:
             if epoch % 10 == 0 or epoch == self.epochs - 1:
                 print(f"[{epoch}] Train: {train_loss:.4f} | Val: {val_loss:.4f}")
 
-            # Early stopping
+            # Early stopping with best model saving
             if val_loss < best_val_loss - self.min_delta:
                 best_val_loss = val_loss
+                best_model_state = copy.deepcopy(self.model.state_dict())
                 wait = 0
             else:
                 wait += 1
                 if wait >= self.patience:
                     print(f"Early stopping at epoch {epoch} with best val_loss: {best_val_loss:.4f}")
                     break
+
+        # Restore best model
+        if best_model_state is not None:
+            self.model.load_state_dict(best_model_state)
 
         self.test_loader = test_loader
         if self.use_wandb:
