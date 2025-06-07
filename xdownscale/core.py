@@ -8,7 +8,6 @@ from .srresnet import SRResNet
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import wandb
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -16,12 +15,14 @@ class Downscaler:
     def __init__(self, input_da, target_da, model_name="srcnn",
                  patch_size=32, batch_size=20, epochs=100,
                  val_split=0.1, test_split=0.1, device='cuda',
-                 use_wandb=False):
+                 use_wandb=False, patience=10, min_delta=1e-4):
         self.patch_size = patch_size
         self.batch_size = batch_size
         self.epochs = epochs
         self.device = device
         self.use_wandb = use_wandb
+        self.patience = patience
+        self.min_delta = min_delta
 
         self.x_max = input_da.values.max()
         self.y_max = target_da.values.max()
@@ -71,19 +72,14 @@ class Downscaler:
             return distgssr(angRes=5, factor=1)
         elif name == "swin":
             return SwinIR(upscale=1, img_size=(self.patch_size, self.patch_size),
-               window_size=5, img_range=1., depths=[6, 6, 6, 6],
-               embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2, upsampler='pixelshuffledirect')
+                          window_size=5, img_range=1., depths=[6, 6, 6, 6],
+                          embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2,
+                          upsampler='pixelshuffledirect')
         else:
             raise ValueError(f"Unknown model name: {name}")
 
     def _train(self, val_split, test_split, model_name):
         if self.use_wandb:
-            wandb.init(project="xdownscale", config={
-                "model": model_name,
-                "epochs": self.epochs,
-                "batch_size": self.batch_size,
-                "patch_size": self.patch_size
-            })
             wandb.init(
                 project="xdownscale",
                 name=f"{model_name.upper()}_run",
@@ -119,6 +115,9 @@ class Downscaler:
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         criterion = torch.nn.MSELoss()
 
+        best_val_loss = float("inf")
+        wait = 0
+
         for epoch in range(self.epochs):
             self.model.train()
             train_loss = 0.0
@@ -146,6 +145,16 @@ class Downscaler:
 
             if epoch % 10 == 0 or epoch == self.epochs - 1:
                 print(f"[{epoch}] Train: {train_loss:.4f} | Val: {val_loss:.4f}")
+
+            # Early stopping
+            if val_loss < best_val_loss - self.min_delta:
+                best_val_loss = val_loss
+                wait = 0
+            else:
+                wait += 1
+                if wait >= self.patience:
+                    print(f"Early stopping at epoch {epoch} with best val_loss: {best_val_loss:.4f}")
+                    break
 
         self.test_loader = test_loader
         if self.use_wandb:
