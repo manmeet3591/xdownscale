@@ -11,9 +11,17 @@ authors:
   - name: Manmeet Singh
     orcid: 0000-0002-3374-7149
     affiliation: 1
+  - name: Naveen Sudharsan
+    orcid: 0000-0002-1328-110X
+    affiliation: 1
+  - name: Amit Kumar Srivastava
+    orcid: 0000-0001-8219-4854
+    affiliation: 3
 affiliations:
   - name: The University of Texas at Austin
     index: 1
+  - name: Leibniz Centre for Agricultural Landscape Research (ZALF), Müncheberg, Germany
+    index: 2
 date: 2025-06-06
 bibliography: paper.bib
 ---
