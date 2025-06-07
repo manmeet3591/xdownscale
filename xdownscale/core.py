@@ -4,6 +4,7 @@ from .model import *  # SRCNN, FSRCNN
 from .distgssr import Net as distgssr
 from .swinir import SwinIR
 from .utils import patchify, unpatchify
+from .srresnet import SRResNet
 import xarray as xr
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import wandb
