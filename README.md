@@ -1,9 +1,10 @@
 # xdownscale
+
+**xdownscale** is a Python package for super-resolution downscaling of gridded datasets using deep learning. It supports a wide range of applications, including satellite observations, reanalysis data, and climate model outputs. Built with PyTorch and xarray, it enables efficient mapping from coarse- to fine-resolution grids in just a few lines of code.
+
 ---
 
-xdownscale is a Python package for super-resolution downscaling of satellite data using different AI models. It allows mapping from a lower-resolution input image (e.g., VIIRS) to a higher-resolution target (e.g., DMSP) in just two lines of code using PyTorch and xarray.
-
-Installation
+## Installation
 
 To install from source:
 
@@ -11,9 +12,9 @@ To install from source:
 git clone https://github.com/manmeet3591/xdownscale.git
 cd xdownscale
 pip install .
-````
+```
 
-Or, if you're using the zip:
+Or install from a zipped archive:
 
 ```bash
 unzip xdownscale_package.zip
@@ -21,13 +22,7 @@ cd xdownscale
 pip install .
 ```
 
-## Requirements
-
-* `torch`
-* `xarray`
-* `numpy`
-
-These are automatically installed via `setup.py`.
+---
 
 ## Usage
 
@@ -36,37 +31,48 @@ import xarray as xr
 import numpy as np
 from xdownscale import Downscaler
 
-# Create dummy data for test
+# Create dummy coarse-resolution input and fine-resolution target
 x = np.random.rand(128, 128).astype(np.float32)
 y = (x + np.random.normal(0, 0.01, size=x.shape)).astype(np.float32)
 
 input_da = xr.DataArray(x, dims=["lat", "lon"])
 target_da = xr.DataArray(y, dims=["lat", "long"])
 
-ds = Downscaler(input_da, target_da, model_name="fsrcnn") # use other models by changing the model name here
+# Initialize the downscaler
+ds = Downscaler(input_da, target_da, model_name="fsrcnn")
 
-# Predict on new input
+# Predict high-resolution output
 result = ds.predict(input_da)
 result.plot()
-
 ```
+
+**Available models**:  
+`srcnn`, `fsrcnn`, `lapsr`, `carnm`, `falsra`, `falsrb`, `ssresnet`, `carn`, `oisrrk2`, `mdsr`, `san`, `rcan`, `unet`, `dlgsanet`, `dpmn`, `safmn`, `dpt`, `distgssr`, `swin`
+
+---
 
 ## Description
 
-Training is performed patch-wise using a simple DataLoader in PyTorch.
-The `predict` method returns an `xarray.DataArray` with the same dimensions as the input.
+xdownscale performs patch-wise training using PyTorch’s `DataLoader` and returns predictions as `xarray.DataArray` objects. It is designed to work with any gridded dataset and provides a flexible interface for model selection, training, and inference.
+
+---
 
 ## Sample Data
-Sample data is available in the folder data. 
+
+Sample input and target data are provided in the `data/` directory for testing and demonstrations.
+
+---
 
 ## Development
 
-To extend this package:
+To extend or customize the package:
 
-* Edit the model architecture in `xdownscale/model.py`
-* Add training logic to `xdownscale/core.py`
-* Customize patching utilities in `xdownscale/utils.py`
+- Modify model architectures in `xdownscale/model.py`
+- Add training logic in `xdownscale/core.py`
+- Customize patch extraction and utilities in `xdownscale/utils.py`
+
+---
 
 ## License
 
-MIT License.
+This project is licensed under the MIT License.
