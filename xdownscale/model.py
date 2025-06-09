@@ -94,6 +94,7 @@ class CARNM(nn.Module):
             x = self.upsample(x)
         return self.exit(x)
 
+#----------------LapSRN----------------------
 class LapSRN(nn.Module):
     def __init__(self, in_channels=1, upscale_factor=1):
         super(LapSRN, self).__init__()
@@ -122,6 +123,8 @@ class LapSRN(nn.Module):
 
         return x
 
+
+#------------------FALSRB------------------
 class FALSRB(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, num_features=32, scale_factor=1):
         super(FALSRB, self).__init__()
@@ -154,7 +157,7 @@ class FALSRB(nn.Module):
         out = self.upsample(x3)
         return out
 
-
+#---------------CARN----------------------------
 
 class ResidualBlock(nn.Module):
     def __init__(self, num_features):
@@ -210,6 +213,8 @@ class CARN(nn.Module):
         out = self.exit(x4)
         return out
 
+#---------------------FALSR_A----------------------
+
 class FALSR_A(nn.Module):
     def __init__(self, in_channels=1, upscale_factor=1):
         super(FALSR_A, self).__init__()
@@ -233,6 +238,8 @@ class FALSR_A(nn.Module):
         x5 = self.relu(self.conv5(x4))
         x6 = self.pixel_shuffle(self.conv6(x5))
         return x6
+
+#----------------OISRRK2------------------------
 
 class OISRRK2(nn.Module):
     def __init__(self, in_channels=1, upscale_factor=1):
@@ -271,6 +278,8 @@ class ResidualBlock(nn.Module):
         x = self.bn2(x)
         return x + residual
 
+#------------------MDSR--------------------------
+
 class MDSR(nn.Module):
     def __init__(self, in_channels, upscale_factor, num_blocks):
         super(MDSR, self).__init__()
@@ -292,6 +301,9 @@ class MDSR(nn.Module):
 
         x3 = self.output_conv(x2)
         return x + x3
+
+
+#---------------SAN------------------------
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels):
@@ -355,6 +367,9 @@ class SAN(nn.Module):
         x4 = self.output_conv(x3)
         return x + x4
 
+
+
+#-----------------RCAN-----------------------
 
 class ResidualChannelAttentionBlock(nn.Module):
     def __init__(self, n_feat, kernel_size=3, reduction=16, bias=True, bn=False, act=nn.ReLU(True), res_scale=1):
