@@ -1,6 +1,6 @@
 # xdownscale
-
-**xdownscale** is a Python package for super-resolution downscaling of gridded datasets using deep learning. It supports a wide range of applications, including satellite observations, reanalysis data, and climate model outputs. Built with PyTorch and xarray, it enables efficient mapping from coarse- to fine-resolution grids in just a few lines of code.
+<p align="center"><img src="xdownscale.png" alt="xdownscale logo" width="400"/></p>
+xdownscale is a Python package for super-resolution downscaling of gridded datasets using deep learning. It supports a wide range of applications, including satellite observations, reanalysis data, and climate model outputs. Built with PyTorch and xarray, it enables efficient mapping from coarse-to-fine-resolution grids in just a few lines of code.
 
 ---
 
