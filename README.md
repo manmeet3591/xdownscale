@@ -53,8 +53,11 @@ result.plot()
 
 ## Description
 
-* Training is performed patch-wise using a simple DataLoader in PyTorch.
-* The `predict` method returns an `xarray.DataArray` with the same dimensions as the input.
+Training is performed patch-wise using a simple DataLoader in PyTorch.
+The `predict` method returns an `xarray.DataArray` with the same dimensions as the input.
+
+## Sample Data
+Sample data is available in the folder data. 
 
 ## Development
 
