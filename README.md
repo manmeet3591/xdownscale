@@ -8,7 +8,7 @@ Installation
 To install from source:
 
 ```bash
-git clone https://github.com/yourusername/xdownscale.git
+git clone https://github.com/manmeet3591/xdownscale.git
 cd xdownscale
 pip install .
 ````
