@@ -15,7 +15,7 @@ xdownscale is a Python package for super-resolution downscaling of gridded datas
 
 ## Installation
 
-To install from PyPI
+To install from PyPI, we recommend using a conda environment
 
 ```bash
 conda create -n xdownscale python=3.10
