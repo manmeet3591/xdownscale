@@ -1,1 +1,6 @@
+include README.md
+include LICENSE.rst
+include requirements.txt
+recursive-include xdownscale *.py
+recursive-include data *
 
