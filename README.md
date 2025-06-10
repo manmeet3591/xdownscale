@@ -19,6 +19,7 @@ To install from PyPI
 
 ```bash
 conda create -n xdownscale python=3.10
+conda activate xdownscale
 conda install -c conda-forge pytorch
 pip install xdownscale
 ```
