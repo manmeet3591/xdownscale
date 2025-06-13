@@ -35,49 +35,31 @@ class Downscaler:
 
     def _get_model(self, name):
         name = name.lower()
-        if name == "srcnn":
-            return SRCNN()
-        elif name == "fsrcnn":
-            return FSRCNN()
-        elif name == "lapsr":
-            return LapSRN(in_channels=1, upscale_factor=1)
-        elif name == "carnm":
-            return CARNM(num_channels=1, scale_factor=1)
-        elif name == "falsrb":
-            return FALSRB(in_channels=1, out_channels=1, scale_factor=1)
-        elif name == "srresnet":
-            return SRResNet(in_channels=1, out_channels=1, upscale_factor=1)
-        elif name == "carn":
-            return CARN(in_channels=1, out_channels=1, upscale_factor=1)
-        elif name == "falsra":
-            return FALSR_A()
-        elif name == "oisrrk2":
-            return OISRRK2()
-        elif name == "mdsr":
-            return MDSR(in_channels=1, upscale_factor=1, num_blocks=16)
-        elif name == "san":
-            return SAN(in_channels=1, upscale_factor=1, num_blocks=16, num_heads=8)
-        elif name == "rcan":
-            return RCAN(in_channels=1, num_blocks=1, upscale_factor=16)
-        elif name == "unet":
-            return UNet(in_channels=1, out_channels=1)
-        elif name == "dlgsanet":
-            return DLGSANet(in_channels=1, upscale_factor=1)
-        elif name == "dpmn":
-            return DPMN(in_channels=1, upscale_factor=1)
-        elif name == "safmn":
-            return SAFMN(in_channels=1, upscale_factor=1)
-        elif name == "dpt":
-            return Net(angRes=5, factor=1)
-        elif name == "distgssr":
-            return distgssr(angRes=5, factor=1)
-        elif name == "swin":
-            return SwinIR(upscale=1, img_size=(self.patch_size, self.patch_size),
-                          window_size=5, img_range=1., depths=[6, 6, 6, 6],
-                          embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2,
-                          upsampler='pixelshuffledirect')
-        else:
-            raise ValueError(f"Unknown model name: {name}")
+        model_map = {
+            "srcnn": SRCNN(),
+            "fsrcnn": FSRCNN(),
+            "lapsr": LapSRN(in_channels=1, upscale_factor=1),
+            "carnm": CARNM(num_channels=1, scale_factor=1),
+            "falsrb": FALSRB(in_channels=1, out_channels=1, scale_factor=1),
+            "srresnet": SRResNet(in_channels=1, out_channels=1, upscale_factor=1),
+            "carn": CARN(in_channels=1, out_channels=1, upscale_factor=1),
+            "falsra": FALSR_A(),
+            "oisrrk2": OISRRK2(),
+            "mdsr": MDSR(in_channels=1, upscale_factor=1, num_blocks=16),
+            "san": SAN(in_channels=1, upscale_factor=1, num_blocks=16, num_heads=8),
+            "rcan": RCAN(in_channels=1, num_blocks=1, upscale_factor=16),
+            "unet": UNet(in_channels=1, out_channels=1),
+            "dlgsanet": DLGSANet(in_channels=1, upscale_factor=1),
+            "dpmn": DPMN(in_channels=1, upscale_factor=1),
+            "safmn": SAFMN(in_channels=1, upscale_factor=1),
+            "dpt": Net(angRes=5, factor=1),
+            "distgssr": distgssr(angRes=5, factor=1),
+            "swin": SwinIR(upscale=1, img_size=(self.patch_size, self.patch_size),
+                           window_size=5, img_range=1., depths=[6, 6, 6, 6],
+                           embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2,
+                           upsampler='pixelshuffledirect')
+        }
+        return model_map.get(name, None) or ValueError(f"Unknown model name: {name}")
 
     def _train(self, val_split, test_split, model_name):
         if self.use_wandb:
@@ -92,11 +74,12 @@ class Downscaler:
                 }
             )
 
-        x = self.input_da.values.astype(np.float32)
+        x = self.input_da.values.astype(np.float32)  # (samples, y, x)
         y = self.target_da.values.astype(np.float32)
 
-        x_patches = patchify(x, self.patch_size)
-        y_patches = patchify(y, self.patch_size)
+        # Apply patchify sample-by-sample
+        x_patches = np.concatenate([patchify(img, self.patch_size) for img in x], axis=0)
+        y_patches = np.concatenate([patchify(img, self.patch_size) for img in y], axis=0)
 
         x_tensor = torch.from_numpy(x_patches[:, None, :, :])
         y_tensor = torch.from_numpy(y_patches[:, None, :, :])
@@ -148,7 +131,6 @@ class Downscaler:
             if epoch % 10 == 0 or epoch == self.epochs - 1:
                 print(f"[{epoch}] Train: {train_loss:.4f} | Val: {val_loss:.4f}")
 
-            # Early stopping with best model saving
             if val_loss < best_val_loss - self.min_delta:
                 best_val_loss = val_loss
                 best_model_state = copy.deepcopy(self.model.state_dict())
@@ -159,7 +141,6 @@ class Downscaler:
                     print(f"Early stopping at epoch {epoch} with best val_loss: {best_val_loss:.4f}")
                     break
 
-        # Restore best model
         if best_model_state is not None:
             self.model.load_state_dict(best_model_state)
 
@@ -177,7 +158,7 @@ class Downscaler:
                 x_tensor = torch.from_numpy(patches[:, None, :, :]).to(self.device)
                 preds = self.model(x_tensor).cpu().numpy()[:, 0, :, :] * self.y_max
                 preds[preds < 0] = 0.0
-                reconstructed = unpatchify(preds, x_input.shape)
+                reconstructed = unpatchify(preds, x_input.shape, self.patch_size)
             else:
                 x_tensor = torch.from_numpy(x_input[None, None, :, :]).to(self.device)
                 pred = self.model(x_tensor).cpu().numpy()[0, 0, :, :] * self.y_max
