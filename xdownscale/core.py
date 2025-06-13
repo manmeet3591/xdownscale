@@ -35,6 +35,7 @@ class Downscaler:
 
     def _get_model(self, name):
         name = name.lower()
+        print(f"Instantiating model: {name}")
         model_map = {
             "srcnn": SRCNN(),
             "fsrcnn": FSRCNN(),
