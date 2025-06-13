@@ -60,7 +60,10 @@ class Downscaler:
                            embed_dim=60, num_heads=[6, 6, 6, 6], mlp_ratio=2,
                            upsampler='pixelshuffledirect')
         }
-        return model_map.get(name, None) or ValueError(f"Unknown model name: {name}")
+        if name not in model_map:
+            raise ValueError(f"Unknown model name: {name}")
+        return model_map[name]
+
 
     def _train(self, val_split, test_split, model_name):
         if self.use_wandb:
