@@ -80,17 +80,17 @@ class Downscaler:
             raise ValueError(f"Unknown model name: {name}")
 
     def _train(self, val_split, test_split, model_name):
-        if self.use_wandb:
-            wandb.init(
-                project="xdownscale",
-                name=f"{model_name.upper()}_run",
-                config={
-                    "model": model_name,
-                    "epochs": self.epochs,
-                    "batch_size": self.batch_size,
-                    "patch_size": self.patch_size
-                }
-            )
+ #       if self.use_wandb:
+ #           wandb.init(
+ #               project="xdownscale",
+ #               name=f"{model_name.upper()}_run",
+ #               config={
+ #                   "model": model_name,
+ #                   "epochs": self.epochs,
+ #                   "batch_size": self.batch_size,
+ #                   "patch_size": self.patch_size
+ #               }
+ #           )
 
         x = self.input_da.values.astype(np.float32)
         y = self.target_da.values.astype(np.float32)
@@ -162,8 +162,8 @@ class Downscaler:
             self.model.load_state_dict(best_model_state)
 
         self.test_loader = test_loader
-        if self.use_wandb:
-            wandb.finish()
+       # if self.use_wandb:
+       #     wandb.finish()
 
     def predict(self, input_da: xr.DataArray, use_patches: bool = True) -> xr.DataArray:
         x_input = (input_da.values / self.x_max).astype(np.float32)
