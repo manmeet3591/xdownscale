@@ -1,5 +1,5 @@
 # xdownscale
-<p align="center"><img src="xdownscale.png" alt="xdownscale logo" width="400"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/manmeet3591/xdownscale/main/images/logo.png" alt="xdownscale logo" width="400"/></p>
 
 <p align="center">
   <a href="https://www.repostatus.org/#active"><img src="https://www.repostatus.org/badges/latest/active.svg" alt="Project Status: Active"></a>
