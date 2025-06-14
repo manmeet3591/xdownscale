@@ -65,7 +65,7 @@ result.plot()
 ```
 
 **Available models**:  
-`srcnn`, `fsrcnn`, `lapsr`, `carnm`, `falsra`, `falsrb`, `ssresnet`, `carn`, `oisrrk2`, `mdsr`, `san`, `rcan`, `unet`, `dlgsanet`, `dpmn`, `safmn`, `dpt`, `distgssr`, `swin`
+`srcnn`, `fsrcnn`, `lapsr`, `carnm`, `falsra`, `falsrb`, `srresnet`, `carn`, `oisrrk2`, `mdsr`, `san`, `rcan`, `unet`, `dlgsanet`, `dpmn`, `safmn`, `dpt`, `distgssr`, `swin`
 
 ---
 
