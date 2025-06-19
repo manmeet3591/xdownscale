@@ -54,6 +54,12 @@ Remote sensing products are often spatially coarse due to sensor limitations or 
 
 It is intended for researchers and practitioners in climate science, remote sensing, and related disciplines.
 
+# Acknowledgements
+
+We thank the contributors to the open-source software ecosystem, especially developers of PyTorch, xarray, and Weights & Biases. We are grateful for institutional support from The University of Texas at Austin and the Indian Institute of Technology Roorkee.
+
+# References
+
 # Installation
 
 ```bash
