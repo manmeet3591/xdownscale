@@ -29,7 +29,7 @@ affiliations:
     index: 1
   - name: Leibniz Centre for Agricultural Landscape Research (ZALF), Müncheberg, Germany
     index: 2
-date: 19 June 2025
+date: '2025-06-19'
 bibliography: paper.bib
 ---
 
