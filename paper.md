@@ -30,7 +30,7 @@ affiliations:
     index: 2
   - name: Indian Institute of Technology, Roorkee, India
     index: 3
-date: 2025-06-06
+date: "2025-06-06"
 bibliography: paper.bib
 ---
 
