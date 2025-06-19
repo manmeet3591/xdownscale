@@ -11,6 +11,7 @@ authors:
   - name: Manmeet Singh
     orcid: 0000-0002-3374-7149
     affiliation: 1
+    corresponding: true
   - name: Naveen Sudharsan
     orcid: 0000-0002-1328-110X
     affiliation: 1
@@ -22,37 +23,37 @@ authors:
     affiliation: 1
   - name: Amit Kumar Srivastava
     orcid: 0000-0001-8219-4854
-    affiliation: 3
+    affiliation: 2
 affiliations:
   - name: The University of Texas at Austin
     index: 1
   - name: Leibniz Centre for Agricultural Landscape Research (ZALF), Müncheberg, Germany
     index: 2
-  - name: Indian Institute of Technology, Roorkee, India
-    index: 3
 date: 2025-06-06
 bibliography: paper.bib
 ---
 
 # Summary
 
-`xdownscale` is an open-source Python package for spatiotemporal resolution enhancement (super-resolution) of gridded Earth observation datasets using deep learning. It provides a consistent and modular interface for applying and experimenting with a variety of deep learning models (e.g., UNet, SRCNN, FSRCNN) for downscaling geospatial data.
+`xdownscale` is an open-source Python toolkit for super-resolution of gridded geospatial datasets using deep learning. It enables the enhancement of spatiotemporal resolution in Earth observation and climate data by providing a unified interface to train and apply deep learning models such as UNet, SRCNN, FSRCNN, and others.
 
-Built on top of `xarray`, `xdownscale` is designed for Earth science and remote sensing applications, enabling easy training, prediction, and GPU-accelerated workflows. The package simplifies patch-based inference and incorporates experiment tracking via Weights & Biases. It supports a variety of datasets such as DMSP-OLS and VIIRS nighttime lights, and land surface temperature (LST), helping users recover finer-resolution data from coarse measurements.
+Designed with Earth science applications in mind, `xdownscale` builds on the `xarray` ecosystem and supports patch-based training, GPU acceleration, and experiment tracking with Weights & Biases. It is particularly well-suited for downscaling satellite-derived products like nighttime lights (e.g., DMSP-OLS, VIIRS) and land surface temperature (LST), among others.
+
+The package offers an efficient workflow for data preparation, model training, and evaluation, making it easy for researchers to apply and benchmark super-resolution techniques on geospatial grids.
 
 # Statement of Need
 
-Remote sensing products are often spatially coarse due to sensor limitations or legacy archive resolutions. Deep learning-based super-resolution offers a promising avenue for increasing the utility of such datasets, but existing tools are often not tailored for geospatial data formats or workflows.
+Many remote sensing and climate datasets are available at coarse spatial resolutions due to sensor limitations or archival constraints. Enhancing the resolution of these datasets is crucial for fine-scale environmental monitoring, urban studies, and climate adaptation research.
 
-`xdownscale` fills this gap by:
+While deep learning-based super-resolution methods have proven effective, existing tools are rarely optimized for the structure and scale of geospatial data. `xdownscale` addresses this gap by offering:
 
-- Supporting `xarray` data structures used in Earth science
-- Providing access to state-of-the-art super-resolution architectures
-- Enabling scalable, patch-based training and inference
-- Supporting GPU acceleration and experiment tracking
-- Reducing engineering overhead for geospatial deep learning experiments
+- Native support for `xarray '- based workflows, commonly used in geoscience
+- Integration of multiple state-of-the-art deep learning architectures
+- Scalable, patch-based inference and training strategies
+- Seamless GPU acceleration and optional logging with Weights & Biases
+- A modular design that simplifies experimentation and benchmarking
 
-It is intended for researchers and practitioners in climate science, remote sensing, and related disciplines.
+By abstracting away low-level engineering complexity, `xdownscale` empowers researchers and practitioners in Earth and environmental sciences to easily apply and extend super-resolution techniques to geospatial applications.
 
 # Installation
 
