@@ -7,6 +7,7 @@
   <!-- <a href="https://anaconda.org/conda-forge/solweig-gpu"><img src="https://anaconda.org/conda-forge/solweig-gpu/badges/version.svg" alt="Conda version"></a> -->
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="https://pepy.tech/project/xdownscale"><img src="https://pepy.tech/badge/xdownscale" alt="PyPI Downloads"></a>
+  <a href="https://joss.theoj.org/papers/40c9c6c313ca7fcd1a236955c391d54c"><img src="https://joss.theoj.org/papers/40c9c6c313ca7fcd1a236955c391d54c/status.svg"></a>
 </p>
 
 xdownscale is a Python package for super-resolution downscaling of gridded datasets using deep learning. It supports a wide range of applications, including satellite observations, reanalysis data, and climate model outputs. Built with PyTorch and xarray, it enables efficient mapping from coarse-to-fine-resolution grids in just a few lines of code. 
