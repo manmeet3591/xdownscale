@@ -1,6 +1,5 @@
 # xdownscale
 <p align="center"><img src="https://raw.githubusercontent.com/manmeet3591/xdownscale/main/xdownscale.png" alt="xdownscale logo" width="400"/></p>
-
 <p align="center">
   <a href="https://www.repostatus.org/#active"><img src="https://www.repostatus.org/badges/latest/active.svg" alt="Project Status: Active"></a>
   <a href="https://pypi.org/project/xdownscale/"><img src="https://badge.fury.io/py/xdownscale.svg" alt="PyPI version"></a>
