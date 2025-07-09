@@ -4,6 +4,20 @@ import torch.nn.functional as F
 
 # ---------------- SRCNN ----------------
 class SRCNN(nn.Module):
+    """
+    Super-Resolution Convolutional Neural Network (SRCNN).
+
+    A 3-layer CNN for image super-resolution. Introduced by Dong et al., SRCNN is a simple but effective model.
+
+    Input shape:
+        (B, 1, H, W)
+
+    Output shape:
+        (B, 1, H, W)
+
+    Reference:
+        Dong, Chao, et al. "Image super-resolution using deep convolutional networks." PAMI 2016.
+    """
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
@@ -19,6 +33,29 @@ class SRCNN(nn.Module):
 
 # ---------------- FSRCNN ----------------
 class FSRCNN(nn.Module):
+    """
+    Fast Super-Resolution Convolutional Neural Network (FSRCNN).
+
+    Parameters
+    ----------
+    d : int
+        Number of feature maps in the first layer.
+    s : int
+        Shrinking parameter for mid layers.
+    m : int
+        Number of mapping layers.
+    upscale_factor : int
+        The upscaling factor.
+
+    Input shape:
+        (B, 1, H, W)
+
+    Output shape:
+        (B, 1, H * upscale_factor, W * upscale_factor)
+
+    Reference:
+        Dong, Chao, et al. "Accelerating the super-resolution convolutional neural network." ECCV 2016.
+    """
     def __init__(self, d=56, s=12, m=4, upscale_factor=1):
         super(FSRCNN, self).__init__()
         self.first_part = nn.Sequential(
@@ -324,6 +361,22 @@ class ResidualBlock(nn.Module):
         return x + residual
 
 class SecondOrderChannelAttention(nn.Module):
+    """
+    Second-order Channel Attention block.
+
+    Applies global average pooling followed by a two-layer MLP to learn channel-wise attention.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input feature channels.
+
+    Input shape:
+        (B, C, H, W)
+
+    Output shape:
+        (B, C, H, W)
+    """
     def __init__(self, in_channels):
         super(SecondOrderChannelAttention, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -438,6 +491,26 @@ class DoubleConv(nn.Module):
         return self.double_conv(x)
 
 class UNet(nn.Module):
+    """
+    U-Net model for image super-resolution.
+
+    A fully convolutional encoder-decoder architecture with skip connections.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels (default is 1).
+    out_channels : int
+        Number of output channels (default is 1).
+    features : list of int
+        Number of feature maps at each level of the encoder.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H, W)
+    """
     def __init__(self, in_channels=1, out_channels=1, features=[64, 128, 256, 512]):
         super(UNet, self).__init__()
         
@@ -1405,6 +1478,21 @@ class ResASPP(nn.Module):
 
 
 def LFsplit(data, angRes):
+    """
+    Split a light field image into angular sub-aperture views.
+
+    Parameters
+    ----------
+    data : torch.Tensor
+        Input tensor of shape (B, C, H, W).
+    angRes : int
+        Angular resolution (number of views along one axis).
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor of shape (B, C * angRes^2, H/angRes, W/angRes).
+    """
     b, _, H, W = data.shape
     h = int(H / angRes)
     w = int(W / angRes)
