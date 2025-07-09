@@ -48,6 +48,30 @@ class Net(nn.Module):
 
 
 class CascadeDisentgGroup(nn.Module):
+    """
+    A cascade of Disentanglement Groups to capture hierarchical spatial-angular dependencies.
+
+    Parameters
+    ----------
+    n_group : int
+        Number of DisentgGroups to use.
+    n_block : int
+        Number of DisentgBlocks per group.
+    angRes : int
+        Angular resolution.
+    channels : int
+        Number of feature channels.
+
+    Forward Input
+    -------------
+    x : torch.Tensor
+        Input tensor of shape [B, C, H, W].
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor after cascading and residual addition.
+    """
     def __init__(self, n_group, n_block, angRes, channels):
         super(CascadeDisentgGroup, self).__init__()
         self.n_group = n_group
@@ -65,6 +89,29 @@ class CascadeDisentgGroup(nn.Module):
 
 
 class DisentgGroup(nn.Module):
+    """
+    A group of Disentanglement Blocks followed by a residual convolution.
+
+    Parameters
+    ----------
+    n_block : int
+        Number of DisentgBlocks in this group.
+    angRes : int
+        Angular resolution.
+    channels : int
+        Number of feature channels.
+
+    Forward Input
+    -------------
+    x : torch.Tensor
+        Input feature map.
+
+    Returns
+    -------
+    torch.Tensor
+        Output feature map after processing through blocks and residual convolution.
+    """
+
     def __init__(self, n_block, angRes, channels):
         super(DisentgGroup, self).__init__()
         self.n_block = n_block
@@ -82,6 +129,27 @@ class DisentgGroup(nn.Module):
 
 
 class DisentgBlock(nn.Module):
+    """
+    A disentanglement block that extracts features using spatial, angular, and epipolar pathways.
+
+    Parameters
+    ----------
+    angRes : int
+        Angular resolution.
+    channels : int
+        Number of input/output feature channels.
+
+    Forward Input
+    -------------
+    x : torch.Tensor
+        Input tensor of shape [B, C, H, W].
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor after feature fusion and residual addition.
+    """
+
     def __init__(self, angRes, channels):
         super(DisentgBlock, self).__init__()
         SpaChannel, AngChannel, EpiChannel = channels, channels//4, channels//2
@@ -124,10 +192,22 @@ class DisentgBlock(nn.Module):
 
 class PixelShuffle1D(nn.Module):
     """
-    1D pixel shuffler
-    Upscales the last dimension (i.e., W) of a tensor by reducing its channel length
-    inout: x of size [b, factor*c, h, w]
-    output: y of size [b, c, h, w*factor]
+    Custom 1D pixel shuffle layer to upscale the width of the input tensor.
+
+    Parameters
+    ----------
+    factor : int
+        Upscaling factor for the width dimension.
+
+    Forward Input
+    -------------
+    x : torch.Tensor
+        Input tensor of shape [B, factor*C, H, W].
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor of shape [B, C, H, W*factor].
     """
     def __init__(self, factor):
         super(PixelShuffle1D, self).__init__()
@@ -143,6 +223,21 @@ class PixelShuffle1D(nn.Module):
 
 
 def MacPI2SAI(x, angRes):
+    """
+    Convert Macro-Pixel Image (MacPI) to Sub-Aperture Image (SAI) format.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Input tensor in MacPI format [B, C, H, W].
+    angRes : int
+        Angular resolution.
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor in SAI format [B, C, H, W].
+    """
     out = []
     for i in range(angRes):
         out_h = []
@@ -154,6 +249,21 @@ def MacPI2SAI(x, angRes):
 
 
 def SAI2MacPI(x, angRes):
+    """
+    Convert Sub-Aperture Image (SAI) to Macro-Pixel Image (MacPI) format.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Input tensor in SAI format [B, C, H, W].
+    angRes : int
+        Angular resolution.
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor in MacPI format [B, C, H, W].
+    """
     b, c, hu, wv = x.shape
     h, w = hu // angRes, wv // angRes
     tempU = []
