@@ -17,6 +17,36 @@ class Downscaler:
                  patch_size=32, batch_size=20, epochs=100,
                  val_split=0.1, test_split=0.1, device='cuda',
                  use_wandb=False, patience=10, min_delta=1e-4):
+        """
+        Initializes the Downscaler class for training deep learning-based super-resolution models on gridded data.
+
+        Parameters
+        ----------
+        input_da : xr.DataArray
+            Low-resolution input data.
+        target_da : xr.DataArray
+            High-resolution target data.
+        model_name : str, optional
+            Name of the model to use (default is "srcnn").
+        patch_size : int, optional
+            Size of patches for training (default is 32).
+        batch_size : int, optional
+            Batch size for training (default is 20).
+        epochs : int, optional
+            Number of training epochs (default is 100).
+        val_split : float, optional
+            Fraction of data used for validation (default is 0.1).
+        test_split : float, optional
+            Fraction of data used for testing (default is 0.1).
+        device : str, optional
+            Device to run the model on, e.g., 'cuda' or 'cpu' (default is 'cuda').
+        use_wandb : bool, optional
+            Whether to use Weights & Biases for logging (default is False).
+        patience : int, optional
+            Patience for early stopping (default is 10).
+        min_delta : float, optional
+            Minimum improvement in validation loss to reset patience (default is 1e-4).
+        """
         self.patch_size = patch_size
         self.batch_size = batch_size
         self.epochs = epochs
@@ -34,6 +64,24 @@ class Downscaler:
         self._train(val_split, test_split, model_name)
 
     def _get_model(self, name):
+        """
+        Returns the initialized model corresponding to the given model name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the model to initialize.
+
+        Returns
+        -------
+        torch.nn.Module
+            Initialized PyTorch model.
+
+        Raises
+        ------
+        ValueError
+            If the model name is not recognized.
+        """
         name = name.lower()
         if name == "srcnn":
             return SRCNN()
@@ -80,6 +128,18 @@ class Downscaler:
             raise ValueError(f"Unknown model name: {name}")
 
     def _train(self, val_split, test_split, model_name):
+        """
+        Trains the selected model using the provided input and target data.
+
+        Parameters
+        ----------
+        val_split : float
+            Fraction of dataset to use for validation.
+        test_split : float
+            Fraction of dataset to use for testing.
+        model_name : str
+            Name of the model being trained.
+        """
  #       if self.use_wandb:
  #           wandb.init(
  #               project="xdownscale",
@@ -166,8 +226,22 @@ class Downscaler:
        #     wandb.finish()
 
     def predict(self, input_da: xr.DataArray, use_patches: bool = True) -> xr.DataArray:
-        x_input = (input_da.values / self.x_max).astype(np.float32)
+        """
+        Generates high-resolution predictions using the trained model.
 
+        Parameters
+        ----------
+        input_da : xr.DataArray
+            Low-resolution input data for prediction.
+        use_patches : bool, optional
+            Whether to use patch-based prediction (default is True). Set to False to predict the whole image directly.
+
+        Returns
+        -------
+        xr.DataArray
+            High-resolution output matching the original coordinates and dimensions of `input_da`.
+        """
+        x_input = (input_da.values / self.x_max).astype(np.float32)
         self.model.eval()
         with torch.no_grad():
             if use_patches:
