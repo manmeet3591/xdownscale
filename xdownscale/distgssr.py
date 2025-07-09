@@ -3,6 +3,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Net(nn.Module):
+    """
+    Main model architecture for learning-based super-resolution using angular and spatial information.
+
+    Parameters
+    ----------
+    angRes : int
+        Angular resolution of the light field.
+    factor : int
+        Upscaling factor for super-resolution.
+
+    Forward Input
+    -------------
+    x : torch.Tensor
+        Input tensor of shape [B, 1, H, W].
+
+    Returns
+    -------
+    out : torch.Tensor
+        Super-resolved output tensor of shape [B, 1, H*factor, W*factor].
+    """
     def __init__(self, angRes, factor):
         super(Net, self).__init__()
         channels = 64
