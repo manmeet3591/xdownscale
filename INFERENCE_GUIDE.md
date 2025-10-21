@@ -35,8 +35,6 @@ predictions = model.predict(new_low_res, use_patches=True)
 predictions.to_netcdf('predictions.nc')
 ```
 
-That's it! 🎉
-
 ---
 
 ## Advanced Options
