@@ -91,6 +91,28 @@ class FSRCNN(nn.Module):
 
 # ---------------- CARNM ----------------
 class ConvBlock(nn.Module):
+    """
+    Convolutional block with BatchNorm and ReLU activation.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Size of the convolutional kernel.
+    stride : int
+        Stride of the convolution.
+    padding : int
+        Padding added to both sides of the input.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H', W')
+    """
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
         super(ConvBlock, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
@@ -101,6 +123,28 @@ class ConvBlock(nn.Module):
         return self.relu(self.bn(self.conv(x)))
 
 class CARNM(nn.Module):
+    """
+    Cascading Anchored Residual Network (CARN) Model variant M.
+
+    Parameters
+    ----------
+    num_channels : int
+        Number of input/output channels.
+    scale_factor : int
+        Upscaling factor.
+    num_residual_groups : int
+        Number of residual groups.
+    num_residual_blocks : int
+        Number of residual blocks per group.
+    num_channels_rg : int
+        Number of channels in residual groups.
+
+    Input shape:
+        (B, num_channels, H, W)
+
+    Output shape:
+        (B, num_channels, H*scale_factor, W*scale_factor)
+    """
     def __init__(self, num_channels=1, scale_factor=1, num_residual_groups=2, num_residual_blocks=2, num_channels_rg=64):
         super(CARNM, self).__init__()
         self.scale_factor = scale_factor
@@ -133,6 +177,25 @@ class CARNM(nn.Module):
 
 #----------------LapSRN----------------------
 class LapSRN(nn.Module):
+    """
+    Laplacian Pyramid Super-Resolution Network.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H*upscale_factor, W*upscale_factor)
+
+    Reference:
+        Lai, Wei-Sheng, et al. "Deep laplacian pyramid networks for fast and accurate super-resolution." CVPR 2017.
+    """
     def __init__(self, in_channels=1, upscale_factor=1):
         super(LapSRN, self).__init__()
 
@@ -163,6 +226,26 @@ class LapSRN(nn.Module):
 
 #------------------FALSRB------------------
 class FALSRB(nn.Module):
+    """
+    Fast and Accurate Lightweight Super-Resolution (FALSR) Model - Variant B.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    num_features : int
+        Number of feature channels in intermediate layers.
+    scale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H*scale_factor, W*scale_factor)
+    """
     def __init__(self, in_channels=1, out_channels=1, num_features=32, scale_factor=1):
         super(FALSRB, self).__init__()
 
@@ -180,6 +263,23 @@ class FALSRB(nn.Module):
             self.upsample = nn.Conv2d(num_features, out_channels, kernel_size=3, padding=1)
 
     def make_layer(self, in_channels, out_channels, kernel_size):
+        """
+        Creates a residual layer with two convolutional blocks.
+
+        Parameters
+        ----------
+        in_channels : int
+            Number of input channels.
+        out_channels : int
+            Number of output channels.
+        kernel_size : int
+            Size of the convolutional kernel.
+
+        Returns
+        -------
+        nn.Sequential
+            Sequential container of conv-relu-conv layers.
+        """
         padding = kernel_size // 2
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=padding),
@@ -197,6 +297,20 @@ class FALSRB(nn.Module):
 #---------------CARN----------------------------
 
 class ResidualBlock(nn.Module):
+    """
+    Basic residual block with two convolutions and a skip connection.
+
+    Parameters
+    ----------
+    num_features : int
+        Number of feature channels.
+
+    Input shape:
+        (B, num_features, H, W)
+
+    Output shape:
+        (B, num_features, H, W)
+    """
     def __init__(self, num_features):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(num_features, num_features, kernel_size=3, padding=1)
@@ -210,6 +324,31 @@ class ResidualBlock(nn.Module):
         return x + residual
 
 class CARN(nn.Module):
+    """
+    Cascading Anchored Residual Network (CARN).
+
+    A fast and accurate image super-resolution model using cascading residual blocks.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    num_features : int
+        Number of feature channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H*upscale_factor, W*upscale_factor)
+
+    Reference:
+        Ahn, Namhyuk, Byungkon Kang, and Kyung-Ah Sohn. "Fast, accurate, and lightweight super-resolution with cascading residual network." ECCV 2018.
+    """
     def __init__(self, in_channels=1, out_channels=1, num_features=64, upscale_factor=1):
         super(CARN, self).__init__()
         self.entry = nn.Conv2d(in_channels, num_features, kernel_size=3, padding=1)
@@ -253,6 +392,22 @@ class CARN(nn.Module):
 #---------------------FALSR_A----------------------
 
 class FALSR_A(nn.Module):
+    """
+    Fast and Accurate Lightweight Super-Resolution (FALSR) Model - Variant A.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H*upscale_factor, W*upscale_factor)
+    """
     def __init__(self, in_channels=1, upscale_factor=1):
         super(FALSR_A, self).__init__()
 
@@ -279,6 +434,22 @@ class FALSR_A(nn.Module):
 #----------------OISRRK2------------------------
 
 class OISRRK2(nn.Module):
+    """
+    Optical Image Super-Resolution Residual Network K2.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H*upscale_factor, W*upscale_factor)
+    """
     def __init__(self, in_channels=1, upscale_factor=1):
         super(OISRRK2, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
@@ -298,6 +469,20 @@ class OISRRK2(nn.Module):
         return out
 
 class ResidualBlock(nn.Module):
+    """
+    Residual block with batch normalization and PReLU activation.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input/output channels.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, in_channels):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
@@ -318,6 +503,27 @@ class ResidualBlock(nn.Module):
 #------------------MDSR--------------------------
 
 class MDSR(nn.Module):
+    """
+    Multi-scale Deep Super-Resolution (MDSR) network.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+    num_blocks : int
+        Number of residual blocks.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+
+    Reference:
+        Lim, Bee, et al. "Enhanced deep residual networks for single image super-resolution." CVPR 2017.
+    """
     def __init__(self, in_channels, upscale_factor, num_blocks):
         super(MDSR, self).__init__()
 
@@ -343,6 +549,20 @@ class MDSR(nn.Module):
 #---------------SAN------------------------
 
 class ResidualBlock(nn.Module):
+    """
+    Residual block with batch normalization and PReLU activation for SAN.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input/output channels.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, in_channels):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
@@ -393,6 +613,29 @@ class SecondOrderChannelAttention(nn.Module):
         return x * torch.sigmoid(y)
 
 class SAN(nn.Module):
+    """
+    Second-order Attention Network for image super-resolution.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+    num_blocks : int
+        Number of residual blocks.
+    num_heads : int
+        Number of attention heads.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+
+    Reference:
+        Dai, Tao, et al. "Second-order attention network for single image super-resolution." CVPR 2019.
+    """
     def __init__(self, in_channels, upscale_factor, num_blocks, num_heads):
         super(SAN, self).__init__()
 
@@ -425,6 +668,32 @@ class SAN(nn.Module):
 #-----------------RCAN-----------------------
 
 class ResidualChannelAttentionBlock(nn.Module):
+    """
+    Residual Channel Attention Block (RCAB).
+
+    Parameters
+    ----------
+    n_feat : int
+        Number of feature channels.
+    kernel_size : int
+        Size of the convolutional kernel.
+    reduction : int
+        Channel reduction ratio for attention.
+    bias : bool
+        Whether to use bias in convolutions.
+    bn : bool
+        Whether to use batch normalization.
+    act : nn.Module
+        Activation function.
+    res_scale : float
+        Residual scaling factor.
+
+    Input shape:
+        (B, n_feat, H, W)
+
+    Output shape:
+        (B, n_feat, H, W)
+    """
     def __init__(self, n_feat, kernel_size=3, reduction=16, bias=True, bn=False, act=nn.ReLU(True), res_scale=1):
         super(ResidualChannelAttentionBlock, self).__init__()
         modules_body = []
@@ -451,6 +720,27 @@ class ResidualChannelAttentionBlock(nn.Module):
         return res
 
 class RCAN(nn.Module):
+    """
+    Residual Channel Attention Network (RCAN).
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    num_blocks : int
+        Number of residual channel attention blocks.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+
+    Reference:
+        Zhang, Yulun, et al. "Image super-resolution using very deep residual channel attention networks." ECCV 2018.
+    """
     def __init__(self, in_channels, num_blocks, upscale_factor):
         super(RCAN, self).__init__()
 
@@ -478,6 +768,22 @@ import torch.nn.functional as F
 
 # ---------------- UNet ----------------
 class DoubleConv(nn.Module):
+    """
+    Double convolutional block used in U-Net.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H, W)
+    """
     def __init__(self, in_channels, out_channels):
         super(DoubleConv, self).__init__()
         self.double_conv = nn.Sequential(
@@ -558,6 +864,22 @@ class UNet(nn.Module):
         return self.final_conv(x)
 
 class CALayer(nn.Module):
+    """
+    Channel Attention Layer.
+
+    Parameters
+    ----------
+    channel : int
+        Number of input channels.
+    reduction : int
+        Channel reduction ratio for attention mechanism.
+
+    Input shape:
+        (B, channel, H, W)
+
+    Output shape:
+        (B, channel, H, W)
+    """
     def __init__(self, channel, reduction=16):
         super(CALayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -572,6 +894,28 @@ class CALayer(nn.Module):
         return nn.Sigmoid()(y) * x
 
 class Block(nn.Module):
+    """
+    Convolutional block with channel attention.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Size of the convolutional kernel.
+    stride : int
+        Stride of the convolution.
+    padding : int
+        Padding added to both sides of the input.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H, W)
+    """
     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
         super(Block, self).__init__()
         self.c1 = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
@@ -586,6 +930,22 @@ class Block(nn.Module):
         return h1
 
 class DLGSANet(nn.Module):
+    """
+    Deep Learning-based Geospatial Super-resolution Attention Network.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, in_channels, upscale_factor):
         super(DLGSANet, self).__init__()
 
@@ -610,6 +970,22 @@ class DLGSANet(nn.Module):
         return x + x3
 
 class DPMN(nn.Module):
+    """
+    Deep Progressive Multi-scale Network.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, in_channels=1, upscale_factor=1):
         super(DPMN, self).__init__()
 
@@ -666,6 +1042,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class SAFMN(nn.Module):
+    """
+    Spatially-Adaptive Feature Modulation Network.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    upscale_factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H*upscale_factor, W*upscale_factor)
+    """
     def __init__(self, in_channels=1, upscale_factor=1):
         super(SAFMN, self).__init__()
 
@@ -702,6 +1094,27 @@ import torch.nn.functional as F
 
 
 def same_padding(images, ksizes, strides, rates):
+    """
+    Apply "same" padding to images for convolutional operations.
+
+    Parameters
+    ----------
+    images : torch.Tensor
+        Input images of shape (B, C, H, W).
+    ksizes : list of int
+        Kernel sizes [ksize_rows, ksize_cols].
+    strides : list of int
+        Strides [stride_rows, stride_cols].
+    rates : list of int
+        Dilation rates [rate_rows, rate_cols].
+
+    Returns
+    -------
+    images : torch.Tensor
+        Padded images.
+    paddings : tuple
+        Padding values (left, right, top, bottom).
+    """
     assert len(images.size()) == 4
     batch_size, channel, rows, cols = images.size()
     out_rows = (rows + strides[0] - 1) // strides[0]
@@ -752,6 +1165,41 @@ def extract_image_patches(images, ksizes, strides, rates, padding='same'):
 
 
 class CrossAttentionSALSA(nn.Module):
+    """
+    Cross-attention Spatial-Angular Light field Super-resolution Attention module.
+
+    Parameters
+    ----------
+    ksize : int
+        Kernel size for attention.
+    stride_1 : int
+        First stride for tokenization.
+    stride_2 : int
+        Second stride for tokenization.
+    softmax_scale : float
+        Scaling factor for softmax attention.
+    shape : int
+        Shape of the feature map.
+    p_len : int
+        Patch length.
+    in_channels : int
+        Number of input channels.
+    inter_channels : int
+        Number of intermediate channels.
+    use_multiple_size : bool
+        Whether to use multiple kernel sizes.
+    use_topk : bool
+        Whether to use top-k attention.
+    add_SE : bool
+        Whether to add squeeze-and-excitation block.
+
+    Input shape:
+        s: (B, in_channels, H, W) - content features
+        g: (B, in_channels, H, W) - gradient features
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, ksize=7, stride_1=4, stride_2=4, softmax_scale=10, shape=64, p_len=64, in_channels=64
                  , inter_channels=16, use_multiple_size=False, use_topk=False, add_SE=False):
         super(CrossAttentionSALSA, self).__init__()
@@ -871,6 +1319,40 @@ class CrossAttentionSALSA(nn.Module):
 
 
 class SALSA(nn.Module):
+    """
+    Spatial-Angular Light field Super-resolution Attention module.
+
+    Parameters
+    ----------
+    ksize : int
+        Kernel size for attention.
+    stride_1 : int
+        First stride for tokenization.
+    stride_2 : int
+        Second stride for tokenization.
+    softmax_scale : float
+        Scaling factor for softmax attention.
+    shape : int
+        Shape of the feature map.
+    p_len : int
+        Patch length.
+    in_channels : int
+        Number of input channels.
+    inter_channels : int
+        Number of intermediate channels.
+    use_multiple_size : bool
+        Whether to use multiple kernel sizes.
+    use_topk : bool
+        Whether to use top-k attention.
+    add_SE : bool
+        Whether to add squeeze-and-excitation block.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, H, W)
+    """
     def __init__(self, ksize=7, stride_1=4, stride_2=4, softmax_scale=10, shape=64, p_len=64, in_channels=64
                  , inter_channels=16, use_multiple_size=False, use_topk=False, add_SE=False):
         super(SALSA, self).__init__()
@@ -982,6 +1464,25 @@ class SALSA(nn.Module):
 
 
 class SE_net(nn.Module):
+    """
+    Squeeze-and-Excitation Network module.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    reduction : int
+        Channel reduction ratio.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, in_channels, 1, 1)
+
+    Reference:
+        Hu, Jie, et al. "Squeeze-and-excitation networks." CVPR 2018.
+    """
     def __init__(self, in_channels, reduction=16):
         super(SE_net, self).__init__()
         self.pool = nn.AdaptiveAvgPool2d(1)
@@ -998,6 +1499,25 @@ class SE_net(nn.Module):
 
 
 class size_selector(nn.Module):
+    """
+    Adaptive size selection module using learnable embeddings.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    intermediate_channels : int
+        Number of intermediate embedding channels.
+    out_channels : int
+        Number of output selection channels.
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        a: (B, 1, 1, 1) - first selector weights
+        b: (B, 1, 1, 1) - second selector weights
+    """
     def __init__(self, in_channels, intermediate_channels, out_channels):
         super(size_selector, self).__init__()
         self.embedding = nn.Sequential(
@@ -1024,6 +1544,17 @@ class size_selector(nn.Module):
 
 
 class Get_gradient(nn.Module):
+    """
+    Compute image gradients using Sobel-like filters.
+
+    Extracts horizontal and vertical gradients from input images.
+
+    Input shape:
+        (B, C, H, W)
+
+    Output shape:
+        (B, 1, H, W) - gradient magnitude
+    """
     def __init__(self):
         super(Get_gradient, self).__init__()
         kernel_v = [[0, -1, 0],
@@ -1047,6 +1578,22 @@ class Get_gradient(nn.Module):
 
 
 class ADAM(nn.Module):
+    """
+    Angular Disparity-Aware Module for light field processing.
+
+    Parameters
+    ----------
+    channel : int
+        Number of feature channels.
+    angRes : int
+        Angular resolution of the light field.
+
+    Input shape:
+        (B, N, C, H, W) where N = angRes^2
+
+    Output shape:
+        (B, N, C, H, W)
+    """
     def __init__(self, channel, angRes):
         super(ADAM, self).__init__()
         self.conv_1 = nn.Conv2d(channel*2, channel, kernel_size=1, stride=1, padding=0)
@@ -1094,6 +1641,20 @@ class ADAM(nn.Module):
 
 
 class salsa(nn.Module):
+    """
+    Wrapper module for SALSA attention with residual connection.
+
+    Parameters
+    ----------
+    feat_num : int
+        Number of feature channels.
+
+    Input shape:
+        (B, feat_num, H, W)
+
+    Output shape:
+        (B, feat_num, H, W)
+    """
     def __init__(self, feat_num):
         super(salsa, self).__init__()
         self.attention = SALSA(in_channels=feat_num)
@@ -1105,6 +1666,21 @@ class salsa(nn.Module):
 
 
 class crossattentionsalsa(nn.Module):
+    """
+    Wrapper module for cross-attention SALSA with residual connection.
+
+    Parameters
+    ----------
+    feat_num : int
+        Number of feature channels.
+
+    Input shape:
+        s: (B, feat_num, H, W) - content features
+        g: (B, feat_num, H, W) - gradient features
+
+    Output shape:
+        (B, feat_num, H, W)
+    """
     def __init__(self, feat_num):
         super(crossattentionsalsa, self).__init__()
         self.attention = CrossAttentionSALSA(in_channels=feat_num)
@@ -1114,6 +1690,18 @@ class crossattentionsalsa(nn.Module):
         return s
 
 class FusionTransformer(nn.Module):
+    """
+    Fusion Transformer for combining content and gradient features.
+
+    Applies row-wise and column-wise cross-attention transformations.
+
+    Input shape:
+        s: (B, 25, C, H, W) - content features (5x5 angular views)
+        g: (B, 25, C, H, W) - gradient features (5x5 angular views)
+
+    Output shape:
+        (B, 25, C, H, W)
+    """
     def __init__(self):
         super(FusionTransformer, self).__init__()
         channel = 36
@@ -1149,6 +1737,22 @@ class FusionTransformer(nn.Module):
 
 
 class ContentBranch(nn.Module):
+    """
+    Content processing branch for light field super-resolution.
+
+    Parameters
+    ----------
+    angRes : int
+        Angular resolution of the light field.
+    factor : int
+        Upscaling factor.
+
+    Input shape:
+        (B, 1, H, W)
+
+    Output shape:
+        (B, N, 3*C, H, W) where N = angRes^2
+    """
     def __init__(self, angRes, factor):
         super(ContentBranch, self).__init__()
         channel = 36
@@ -1214,6 +1818,22 @@ class ContentBranch(nn.Module):
 
 
 class GradientBranch(nn.Module):
+    """
+    Gradient processing branch for light field super-resolution.
+
+    Parameters
+    ----------
+    angRes : int
+        Angular resolution of the light field.
+    factor : int
+        Upscaling factor.
+
+    Input shape:
+        (B, 1, H, W)
+
+    Output shape:
+        (B, N, 3*C, H, W) where N = angRes^2
+    """
     def __init__(self, angRes, factor):
         super(GradientBranch, self).__init__()
         channel = 36
@@ -1279,6 +1899,22 @@ class GradientBranch(nn.Module):
 
 
 class Net(nn.Module):
+    """
+    Main network combining content and gradient branches for light field super-resolution.
+
+    Parameters
+    ----------
+    angRes : int
+        Angular resolution of the light field.
+    factor : int
+        Upscaling factor for super-resolution.
+
+    Input shape:
+        (B, 1, H, W)
+
+    Output shape:
+        (B, 1, H*factor, W*factor)
+    """
     def __init__(self, angRes, factor):
         super(Net, self).__init__()
         n_blocks, channel = 5, 36
@@ -1307,6 +1943,19 @@ class Net(nn.Module):
 
 
 def Col_T(feature):
+    """
+    Transpose column-wise organization of light field features.
+
+    Parameters
+    ----------
+    feature : torch.Tensor
+        Input features of shape (B, 25, C, H, W).
+
+    Returns
+    -------
+    torch.Tensor
+        Column-transposed features of shape (B, 25, C, H, W).
+    """
     feature_T = []
     for i in range(5):
         col = []
@@ -1319,6 +1968,24 @@ def Col_T(feature):
 
 
 class Upsample(nn.Module):
+    """
+    Upsample module using pixel shuffle.
+
+    Parameters
+    ----------
+    blocks : int
+        Number of input feature blocks.
+    channel : int
+        Number of channels per block.
+    factor : int
+        Upsampling factor.
+
+    Input shape:
+        (B, N, blocks*channel, H, W)
+
+    Output shape:
+        (B, N, 1, H*factor, W*factor)
+    """
     def __init__(self, blocks,channel, factor):
         super(Upsample, self).__init__()
         self.upsp = nn.Sequential(
@@ -1336,6 +2003,20 @@ class Upsample(nn.Module):
 
 
 class FeaExtract(nn.Module):
+    """
+    Feature extraction module with residual ASPP blocks.
+
+    Parameters
+    ----------
+    channel : int
+        Number of output feature channels.
+
+    Input shape:
+        (B, N, H, W)
+
+    Output shape:
+        (B, N, channel, H, W)
+    """
     def __init__(self, channel):
         super(FeaExtract, self).__init__()
         self.FEconv = nn.Conv2d(1, channel, kernel_size=1, stride=1, padding=0, bias=False)
@@ -1360,6 +2041,22 @@ class FeaExtract(nn.Module):
 
 
 class ResidualBlocks(nn.Module):
+    """
+    Sequential residual blocks.
+
+    Parameters
+    ----------
+    n_blocks : int
+        Number of residual blocks.
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, N, channel, H, W)
+
+    Output shape:
+        (B, N, channel, H, W)
+    """
     def __init__(self, n_blocks, channel):
         super(ResidualBlocks, self).__init__()
         self.n_blocks = n_blocks
@@ -1375,6 +2072,22 @@ class ResidualBlocks(nn.Module):
 
 
 class CascadedBlocks(nn.Module):
+    """
+    Sequential Information Multi-Distillation Blocks (IMDB).
+
+    Parameters
+    ----------
+    n_blocks : int
+        Number of cascaded blocks.
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, N, channel, H, W)
+
+    Output shape:
+        (B, N, channel, H, W)
+    """
     def __init__(self, n_blocks, channel):
         super(CascadedBlocks, self).__init__()
         self.n_blocks = n_blocks
@@ -1392,6 +2105,20 @@ class CascadedBlocks(nn.Module):
 
 
 class ResBlock(nn.Module):
+    """
+    Residual block for light field features.
+
+    Parameters
+    ----------
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, N, channel, H, W)
+
+    Output shape:
+        (B, N, channel, H, W)
+    """
     def __init__(self, channel):
         super(ResBlock, self).__init__()
         self.conv01 = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
@@ -1410,6 +2137,20 @@ class ResBlock(nn.Module):
 
 
 class RB(nn.Module):
+    """
+    Basic residual block with two convolutions.
+
+    Parameters
+    ----------
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, channel, H, W)
+
+    Output shape:
+        (B, channel, H, W)
+    """
     def __init__(self, channel):
         super(RB, self).__init__()
         self.conv01 = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
@@ -1424,6 +2165,20 @@ class RB(nn.Module):
 
 
 class IMDB(nn.Module):
+    """
+    Information Multi-Distillation Block.
+
+    Parameters
+    ----------
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, N, channel, H, W)
+
+    Output shape:
+        (B, N, channel, H, W)
+    """
     def __init__(self, channel):
         super(IMDB, self).__init__()
         self.conv_0 = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
@@ -1450,6 +2205,21 @@ class IMDB(nn.Module):
 
 
 def ChannelSplit(input):
+    """
+    Split input tensor into two parts along the channel dimension.
+
+    Parameters
+    ----------
+    input : torch.Tensor
+        Input tensor of shape (B, C, H, W).
+
+    Returns
+    -------
+    output_1 : torch.Tensor
+        First quarter of channels (B, C//4, H, W).
+    output_2 : torch.Tensor
+        Remaining three quarters (B, 3*C//4, H, W).
+    """
     _, C, _, _ = input.shape
     c = C // 4
     output_1 = input[:, :c, :, :]
@@ -1458,6 +2228,20 @@ def ChannelSplit(input):
 
 
 class ResASPP(nn.Module):
+    """
+    Residual Atrous Spatial Pyramid Pooling.
+
+    Parameters
+    ----------
+    channel : int
+        Number of feature channels.
+
+    Input shape:
+        (B, channel, H, W)
+
+    Output shape:
+        (B, channel, H, W)
+    """
     def __init__(self, channel):
         super(ResASPP, self).__init__()
         self.conv_1 = nn.Sequential(nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1,
@@ -1506,6 +2290,19 @@ def LFsplit(data, angRes):
 
 
 def FormOutput(x_sv):
+    """
+    Form output from light field sub-aperture views.
+
+    Parameters
+    ----------
+    x_sv : torch.Tensor
+        Input features of shape (B, N, C, H, W) where N = angRes^2 - 1.
+
+    Returns
+    -------
+    torch.Tensor
+        Reconstructed light field of shape (B, C, H*angRes, W*angRes).
+    """
     b, n, c, h, w = x_sv.shape
     angRes = int(sqrt(n + 1))
     out = []
@@ -1524,6 +2321,21 @@ def FormOutput(x_sv):
 
 
 def FormOutput_ADAM(x_sv, x_cv):
+    """
+    Form output from ADAM module by inserting center view.
+
+    Parameters
+    ----------
+    x_sv : torch.Tensor
+        Surrounding view features of shape (B, 24, C, H, W).
+    x_cv : torch.Tensor
+        Center view features of shape (B, C, H, W).
+
+    Returns
+    -------
+    torch.Tensor
+        Combined features of shape (B, 25, C, H, W).
+    """
     x_sv_part1 = x_sv[:, 0:12, :, :, :]
     x_sv_part2 = x_sv[:, 12:24, :, :, :]
     x_cv = x_cv.unsqueeze(1)
