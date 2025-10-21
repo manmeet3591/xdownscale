@@ -7,6 +7,28 @@ from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 
 class Mlp(nn.Module):
+    """
+    Multi-Layer Perceptron (MLP) module.
+
+    Parameters
+    ----------
+    in_features : int
+        Number of input features.
+    hidden_features : int, optional
+        Number of hidden layer features (default: same as in_features).
+    out_features : int, optional
+        Number of output features (default: same as in_features).
+    act_layer : nn.Module
+        Activation layer (default: nn.GELU).
+    drop : float
+        Dropout rate (default: 0.0).
+
+    Input shape:
+        (*, in_features)
+
+    Output shape:
+        (*, out_features)
+    """
     def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
         super().__init__()
         out_features = out_features or in_features
@@ -746,6 +768,14 @@ class SwinIR(nn.Module):
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
+        """
+        Initialize model weights.
+
+        Parameters
+        ----------
+        m : nn.Module
+            Module to initialize.
+        """
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=.02)
             if isinstance(m, nn.Linear) and m.bias is not None:
@@ -756,13 +786,28 @@ class SwinIR(nn.Module):
 
     @torch.jit.ignore
     def no_weight_decay(self):
+        """Return parameter names that should not have weight decay applied."""
         return {'absolute_pos_embed'}
 
     @torch.jit.ignore
     def no_weight_decay_keywords(self):
+        """Return keywords for parameter names that should not have weight decay applied."""
         return {'relative_position_bias_table'}
 
     def check_image_size(self, x):
+        """
+        Pad image to be divisible by window size.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor of shape (B, C, H, W).
+
+        Returns
+        -------
+        torch.Tensor
+            Padded tensor.
+        """
         _, _, h, w = x.size()
         mod_pad_h = (self.window_size - h % self.window_size) % self.window_size
         mod_pad_w = (self.window_size - w % self.window_size) % self.window_size
@@ -770,6 +815,19 @@ class SwinIR(nn.Module):
         return x
 
     def forward_features(self, x):
+        """
+        Forward pass through feature extraction layers.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor of shape (B, C, H, W).
+
+        Returns
+        -------
+        torch.Tensor
+            Extracted features.
+        """
         x_size = (x.shape[2], x.shape[3])
         x = self.patch_embed(x)
         if self.ape:
@@ -822,6 +880,14 @@ class SwinIR(nn.Module):
         return x[:, :, :H*self.upscale, :W*self.upscale]
 
     def flops(self):
+        """
+        Calculate FLOPs (floating point operations) for the model.
+
+        Returns
+        -------
+        int
+            Total number of FLOPs.
+        """
         flops = 0
         H, W = self.patches_resolution
         flops += H * W * 3 * self.embed_dim * 9

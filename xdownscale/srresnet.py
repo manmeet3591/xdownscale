@@ -6,6 +6,24 @@ import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 class ResidualBlock(nn.Module):
+    """
+    Residual block with two convolutional layers and a skip connection.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Size of the convolutional kernel (default is 3).
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H, W)
+    """
     def __init__(self, in_channels, out_channels, kernel_size=3):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=kernel_size//2)
@@ -19,6 +37,33 @@ class ResidualBlock(nn.Module):
         return x + residual
 
 class SRResNet(nn.Module):
+    """
+    Super-Resolution Residual Network (SRResNet).
+
+    A deep residual network for image super-resolution using multiple residual blocks.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels (default is 1).
+    out_channels : int
+        Number of output channels (default is 1).
+    num_features : int
+        Number of feature channels (default is 64).
+    num_blocks : int
+        Number of residual blocks (default is 16).
+    upscale_factor : int
+        Upscaling factor for super-resolution (default is 1).
+
+    Input shape:
+        (B, in_channels, H, W)
+
+    Output shape:
+        (B, out_channels, H*upscale_factor, W*upscale_factor)
+
+    Reference:
+        Ledig, Christian, et al. "Photo-realistic single image super-resolution using a generative adversarial network." CVPR 2017.
+    """
     def __init__(self, in_channels=1, out_channels=1, num_features=64, num_blocks=16, upscale_factor=1):
         super(SRResNet, self).__init__()
 
