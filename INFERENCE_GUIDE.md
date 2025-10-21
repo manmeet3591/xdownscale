@@ -24,7 +24,7 @@ model = Downscaler(
 )
 ```
 
-### 2. **Run Inference** ✨
+### 2. **Run Inference**
 
 ```python
 # Inference on new data
@@ -143,7 +143,7 @@ Available models (via `model_name` parameter):
 - `"srresnet"` - Deep residual network
 - `"swin"` - Swin Transformer (state-of-the-art)
 - `"rcan"` - Residual Channel Attention Network
-- And many more! See `core.py` for full list
+- And many more! See `core.py` for the full list
 
 ---
 
@@ -166,7 +166,7 @@ Available models (via `model_name` parameter):
    - Normalize your data if needed
 
 4. **3D Data?**
-   - Just pass it in! The model handles time dimension automatically
+   - Just pass it in! The model handles the time dimension automatically
    - Each time step is treated as an independent training sample
 
 ---
@@ -174,5 +174,5 @@ Available models (via `model_name` parameter):
 ## Questions?
 
 Check the example file: `example_inference.py`
-Or see the documentation in the code docstrings.
+Alternatively, refer to the documentation.
 
